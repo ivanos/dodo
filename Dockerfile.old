@@ -1,0 +1,12 @@
+FROM erlang
+
+WORKDIR /root
+RUN git clone https://bitbucket.org/mkharch/dobby.git && cd dobby && \
+    wget -c http://github.com/rebar/rebar/wiki/rebar && chmod +x rebar && \
+    ./rebar get-deps compile && \
+    deps/erl_sshd/make_keys && \
+    cd rel && ../rebar generate
+
+WORKDIR /root/dobby
+CMD rel/dobby/bin/dobby console
+

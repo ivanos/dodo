@@ -1,0 +1,11 @@
+FROM erlang
+
+WORKDIR /root
+RUN git clone https://github.com/maximk/dobby_allinone_node.git && \
+  cd dobby_allinone_node && \
+  make compile id_rsa && \
+  cd rel && ../rebar generate
+
+WORKDIR /root/dobby_allinone_node
+CMD rel/dobby_allinone/bin/dobby_allinone console
+

@@ -1,0 +1,186 @@
+swagger: 2.0
+info:
+  title: Dobby API
+schemes:
+  - http
+host: localhost:8080
+basePath: /
+
+parameters:
+  id:
+    name: id
+    description: An identifier
+    type: string
+    in: path
+    required: true
+  id1:
+    name: id1
+    description: A source identifier
+    type: string
+    in: path
+    required: true
+  id2:
+    name: id2
+    description: A destination identifier
+    type: string
+    in: path
+    required: true
+
+definitions:
+  Metadata:
+    type: object
+    additionalProperties:
+      type: object
+      properties:
+        value: any
+        timestamp: { type: string }
+        publisher_id: { type: string }
+  IdInfo:
+    type: object
+    properties:
+      identifier: { type: string }
+      metadata:
+        $ref: "#/definitions/Metadata"
+  LinkInfo:
+    type: object
+    properties:
+      link: { type: string }
+      metadata:
+        $ref: "#/definitions/Metadata"
+  SearchParams:
+    type: object
+    properties:
+      max_depth:      { type: integer }
+      traversal:      { type: string }
+      max_size:       { type: integer }
+      match_metadata: { type: object }
+      match_links:    { type: object }
+      match_terminal: { type: object }
+      match_path:
+        type: array
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              element: { type: string }
+              metadata: { type: object }
+      results_filter:
+        type: array
+        items: { type: string }
+
+  SearchResult:
+    type: array
+    items:
+      type: object
+      properties:
+        identifiers:
+          type: array
+          items:
+            $ref: "#/definitions/IdInfo"
+        links:
+          type: array
+          items:
+            $ref: "#/definitions/LinkInfo"
+
+paths:
+  /identifier/{id}:
+    get:
+      tags: [ dobby ]
+      operationId: get_id
+      parameters:
+        - $ref: "#/parameters/id"
+      description: Get identifier details
+      responses:
+        200:
+          description: Ok
+          schema:
+            $ref: "#/definitions/IdInfo"
+    post:
+      tags: [ dobby ]
+      operationId: create_id
+      parameters:
+        - $ref: "#/parameters/id"
+        - name: info
+          schema:
+            type: object
+            properties:
+              metadata:
+                type: object
+          in: body
+          required: true
+      description: Create an identifier
+      responses:
+        201: { description: Created }
+    delete:
+      tags: [ dobby ]
+      operationId: delete_id
+      parameters:
+        - $ref: "#/parameters/id"
+      description: Delete an identifier
+      responses:
+        204: { description: Deleted }
+
+  /link/{id1}/{id2}:
+    get:
+      tags: [ dobby ]
+      operationId: get_link
+      parameters:
+        - $ref: "#/parameters/id1"
+        - $ref: "#/parameters/id2"
+      description: Get link details
+      responses:
+        200:
+          description: Ok
+          schema:
+            $ref: "#/definitions/LinkInfo"
+    post:
+      tags: [ dobby ]
+      operationId: create_link
+      parameters:
+        - $ref: "#/parameters/id1"
+        - $ref: "#/parameters/id2"
+        - name: info
+          schema:
+            type: object
+            properties:
+              metadata:
+                type: object
+          in: body
+          required: true
+      description: Create a link
+      responses:
+        201: { description: Created }
+    delete:
+      tags: [ dobby ]
+      operationId: delete_link
+      parameters:
+        - $ref: "#/parameters/id1"
+        - $ref: "#/parameters/id2"
+      description: Delete a link
+      responses:
+        204: { description: Deleted }
+
+  /identifier/{what}/search:
+    post:
+      tags: [ dobby ]
+      operationId: search
+      parameters:
+        - name: what
+          description: A search string
+          type: string
+          in: path
+          required: true
+        - name: params
+          description: Search parameters
+          schema:
+            $ref: "#/definitions/SearchParams"
+          in: body
+          required: true
+      description: Search
+      responses:
+        200:
+          description: Search ok
+          schema:
+            $ref: "#/definitions/SearchResult"
+
